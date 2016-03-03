@@ -1,0 +1,34 @@
+---
+# tasks file for ansible-role-grafana
+
+- block:
+  - name: Add Vendor Repository Key
+    apt_key: url={{ _grafana.apt.repo.vendor_repo_key }} state=present
+
+  - name: Add Vendor Repository
+    apt_repository: repo="{{ _grafana.apt.repo.vendor_repo_url }}" state=present
+
+  when: _grafana.apt.repo.use_vendor_repo
+
+- name: Apt Update
+  apt: update_cache=yes
+  when: RW_APT_CACHE_UPDATE is defined
+
+- name: Install Grafana
+  apt: name={{ _grafana.apt.package.name }}={{ _grafana.apt.package.version }} state=present
+  notify:
+    - Restart Grafana for {{ ansible_distribution_release }}
+
+- name: Enable for Autostart
+  service: name=grafana-server enabled={{ _grafana.enable }}
+
+- name: Create Configuration Files
+  template: src={{ item }}.j2 dest=/{{ item }} owner=grafana group=grafana mode=0640
+  with_items:
+    - etc/grafana/grafana.ini
+    - etc/grafana/ldap.toml
+    - etc/default/grafana-server
+  notify:
+    - Restart Grafana for {{ ansible_distribution_release }}
+
+

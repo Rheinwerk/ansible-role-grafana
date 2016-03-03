@@ -1,0 +1,49 @@
+---
+# defaults file for ansible-role-grafana
+
+_grafana:
+  enable: yes
+  config:
+    server:
+      protocol: http
+      http_addr:
+      http_port: 3000
+      domain: localhost
+      root_url: "%(protocol)s://%(domain)s:%(http_port)s/"
+      cert_file:
+      cert_key:
+    database:
+      type: sqlite3
+      host_port: 127.0.0.1:3306
+      db_name: grafana
+      db_user: root
+      db_password:
+      ssl_mode: disabled
+      path: grafana.db
+    security:
+      admin_user: admin
+      admin_password: admin
+      secret_key: SW2YcwTIb9zpOOhoPsMm
+      disable_gravatar: true
+    users:
+      allow_sign_up: false
+      allow_org_create: false
+      auto_assign_org: true
+    auth:
+      anonymous:
+        enabled: false
+        org_name: Main Org.
+      ldap:
+        enabled: false
+  apt:
+    repo:
+      use_vendor_repo: yes
+      vendor_repo_key: https://packagecloud.io/gpg.key
+      # Currently, there is no Ubuntu compatible URL, we have to fall back to Debian Wheezy
+      #vendor_repo_url: deb https://packagecloud.io/grafana/stable/ubuntu/ {{ ansible_distribution_release }} main
+      vendor_repo_url: deb https://packagecloud.io/grafana/stable/debian/ wheezy main
+    package:
+      name: grafana
+      #version: "*"
+      version: 2.6.0
+    upgrade: no
