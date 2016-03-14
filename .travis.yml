@@ -2,10 +2,10 @@
 language: python
 python: "2.7"
 
-  # Use the new container infrastructure
-sudo: false
+# Use the new container infrastructure
+sudo: true
 
-  # Install ansible
+# Install ansible
 addons:
   apt:
     packages:
