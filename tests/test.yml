@@ -2,5 +2,7 @@
 - hosts: localhost
   connection: local
   become: yes
+  vars:
+    RW_APT_CACHE_UPDATE: yes
   roles:
     - ansible-role-grafana
