@@ -1,7 +1,7 @@
 Grafana
 =========
 
-This roles installed Grafana with opiniated default settings.
+This role installes Grafana with opiniated default settings.
 
 [![Build Status](https://travis-ci.org/Rheinwerk/ansible-role-grafana.svg?branch=master)](https://travis-ci.org/Rheinwerk/ansible-role-grafana)
 
