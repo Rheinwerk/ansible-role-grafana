@@ -31,4 +31,37 @@
   notify:
     - Restart Grafana for {{ ansible_distribution_release }}
 
+- block:
+    - name: Create Temp Download Directory
+      command: mktemp -d
+      register: tmp_dir_reg
+
+    - set_fact:
+        grafana_plugins_dir: /usr/share/grafana/public/app/plugins/
+        tmp_dir: "{{ tmp_dir_reg.stdout }}"
+
+    - name: Download Plugins
+      get_url: url={{ item.url }} dest={{ tmp_dir }}/{{ item.filename }}
+      with_items: "{{ _grafana.plugins.plugins }}"
+
+    - name: Unzip Plugins
+      unarchive: src="{{ tmp_dir }}/{{ item.filename }}" dest="{{ tmp_dir }}" copy=no
+      with_items: "{{ _grafana.plugins.plugins }}"
+
+    - name: Create Plugin Directories
+      file: path={{ grafana_plugins_dir }}/{{ item.type }} state=directory
+      with_items: "{{ _grafana.plugins.plugins }}"
+
+    - name: Install Plugins
+      synchronize: src={{ tmp_dir }}/{{ item.zip_base_dir }}/ dest={{ grafana_plugins_dir }}/{{ item.type }}
+      with_items: "{{ _grafana.plugins.plugins }}"
+      notify:
+        - Restart Grafana for {{ ansible_distribution_release }}
+
+  always:
+    - name: Delete Temp Download Directory
+      file: path={{ tmp_dir }} state=absent
+      when: tmp_dir is defined and RW_DEBUG is not defined
+
+  when: _grafana.plugins is defined and _grafana.plugins.install and RW_ENABLE_DOWNLOADS is defined
 

@@ -13,7 +13,7 @@ None.
 Role Variables
 --------------
 
-There are two variables that drive this role: `_grafana` and `RW_APT_CACHE_UPDATE`. `_grafana` is a map that contains all configuration and settings for this role. `RW_APT_CACHE_UPDATE` may be specified as an _extra variable_ on invocation of Ansible in order to force `apt-get update`. Please see `defaults/main.yml` for details.
+There are three variables that drive this role: `_grafana`, `RW_APT_CACHE_UPDATE`, and `RW_ENABLE_DOWNLOADS`. `_grafana` is a map that contains all configuration and settings for this role. `RW_APT_CACHE_UPDATE` `RW_ENABLE_DOWNLOADS? may be specified as _extra variables_ on invocation of Ansible in order to force `apt-get update` or download assets from the Internet, respectively. Please see `defaults/main.yml` for details.
 
 Dependencies
 ------------
