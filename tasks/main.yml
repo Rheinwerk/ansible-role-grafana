@@ -55,6 +55,7 @@
     - name: Install Plugins
       synchronize: src={{ tmp_dir }}/{{ item.zip_base_dir }}/ dest={{ grafana_plugins_dir }}/{{ item.type }}
       with_items: "{{ _grafana.plugins.plugins }}"
+      delegate_to: "{{ inventory_hostname }}"
       notify:
         - Restart Grafana for {{ ansible_distribution_release }}
 
