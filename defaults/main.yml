@@ -45,7 +45,7 @@ _grafana:
     package:
       name: grafana
       #version: "*"
-      version: 2.6.0
+      version: 3.1.1-1470047149
     upgrade: no
   plugins:
     install: True
