@@ -34,7 +34,7 @@
 
 
 - name: Install Plugins
-  command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version|default(omit) }}"
+  command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version|default('') }}"
   with_items: "{{ _grafana.plugins }}"
   notify:
     - Restart Grafana for {{ ansible_distribution_release }}
