@@ -4,6 +4,8 @@
 _grafana:
   enable: yes
   config:
+    data_dir: /var/lib/grafana
+    log_dir: /var/log/grafana
     server:
       protocol: http
       http_addr:
@@ -40,18 +42,12 @@ _grafana:
       use_vendor_repo: yes
       vendor_repo_key: https://packagecloud.io/gpg.key
       # Currently, there is no Ubuntu compatible URL, we have to fall back to Debian Wheezy
-      #vendor_repo_url: deb https://packagecloud.io/grafana/stable/ubuntu/ {{ ansible_distribution_release }} main
       vendor_repo_url: deb https://packagecloud.io/grafana/stable/debian/ wheezy main
     package:
       name: grafana
-      #version: "*"
-      version: 3.1.1-1470047149
+      version: "4.*"
     upgrade: no
   plugins:
     install: True
     plugins:
-      - filename: grafana.zip
-        type: datasource
-        zip_base_dir: grafana-plugins-master/datasources
-        url: https://github.com/grafana/grafana-plugins/archive/master.zip
-
+      - plugin_id: bosun-app

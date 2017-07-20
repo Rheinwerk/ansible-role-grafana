@@ -4,9 +4,9 @@ GRAFANA_GROUP=grafana
 
 GRAFANA_HOME=/usr/share/grafana
 
-LOG_DIR=/var/log/grafana
+LOG_DIR={{ _grafana.config.log_dir }}
 
-DATA_DIR=/var/lib/grafana
+DATA_DIR={{ _grafana.config.data_dir }}
 
 MAX_OPEN_FILES=10000
 

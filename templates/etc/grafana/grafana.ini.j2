@@ -6,6 +6,9 @@
 # possible values : production, development
 ; app_mode = production
 
+# instance name, defaults to HOSTNAME environment variable value or hostname if HOSTNAME var is empty
+; instance_name = ${HOSTNAME}
+
 #################################### Paths ####################################
 [paths]
 # Path to where grafana can store temp files, sessions, and the sqlite3 db (if that is used)
@@ -15,7 +18,12 @@
 # Directory where grafana can store logs
 #
 ;logs = /var/log/grafana
+#
+# Directory where grafana will automatically scan and look for plugins
+#
+;plugins = /var/lib/grafana/plugins
 
+#
 #################################### Server ####################################
 [server]
 # Protocol (http or https)
@@ -34,7 +42,8 @@ domain = {{ _grafana.config.server.domain }}
 # Prevents DNS rebinding attacks
 ;enforce_domain = false
 
-# The full public facing url
+# The full public facing url you use in browser, used for redirects and emails
+# If you use reverse proxy and sub path specify full url (with sub path)
 root_url = {{ _grafana.config.server.root_url }}
 
 # Log web requests
@@ -50,14 +59,24 @@ root_url = {{ _grafana.config.server.root_url }}
 cert_file = {{ _grafana.config.server.cert_file }}
 cert_key = {{ _grafana.config.server.cert_key }}
 
+# Unix socket path
+;socket =
+
 #################################### Database ####################################
 [database]
+# You can configure the database connection by specifying type, host, name, user and password
+# as seperate properties or as on string using the url propertie.
+
 # Either "mysql", "postgres" or "sqlite3", it's your choice
 type = {{ _grafana.config.database.type }}
 host = {{ _grafana.config.database.host_port }}
 name = {{ _grafana.config.database.db_name }}
 user = {{ _grafana.config.database.db_user }}
 password = {{ _grafana.config.database.db_password }}
+
+# Use either URL or the previous fields to configure the database
+# Example: mysql://user:secret@host:port/database
+;url =
 
 # For "postgres" only, either "disable", "require" or "verify-full"
 ssl_mode = {{ _grafana.config.database.ssl_mode }}
@@ -87,6 +106,13 @@ path = {{ _grafana.config.database.path }}
 # Session life time, default is 86400
 ;session_life_time = 86400
 
+#################################### Data proxy ###########################
+[dataproxy]
+
+# This enables data proxy logging, default is false
+;logging = false
+
+
 #################################### Analytics ####################################
 [analytics]
 # Server reporting, sends usage counters to stats.grafana.org every 24 hours.
@@ -94,6 +120,13 @@ path = {{ _grafana.config.database.path }}
 # running instances, dashboard and error counts. It is very helpful to us.
 # Change this option to false to disable reporting.
 ;reporting_enabled = true
+
+# Set to false to disable all checks to https://grafana.net
+# for new vesions (grafana itself and plugins), check is used
+# in some UI views to notify that grafana or plugin update exists
+# This option does not cause any auto updates, nor send any information
+# only a GET request to http://grafana.com to get latest versions
+;check_for_updates = true
 
 # Google Analytics universal tracking code, only enabled if you specify an id here
 ;google_analytics_ua_id =
@@ -120,6 +153,18 @@ disable_gravatar = {{ _grafana.config.security.disable_gravatar }}
 # data source proxy whitelist (ip_or_domain:port seperated by spaces)
 ;data_source_proxy_whitelist =
 
+[snapshots]
+# snapshot sharing options
+;external_enabled = true
+;external_snapshot_url = https://snapshots-origin.raintank.io
+;external_snapshot_name = Publish to snapshot.raintank.io
+
+# remove expired snapshot
+;snapshot_remove_expired = true
+
+# remove snapshots after 90 days
+;snapshot_TTL_days = 90
+
 #################################### Users ####################################
 [users]
 # disable user signup / registration
@@ -138,6 +183,13 @@ auto_assign_org = {{ _grafana.config.users.auto_assign_org }}
 ;login_hint = email or username
 
 default_theme = light
+
+[auth]
+# Set to true to disable (hide) the login form, useful if you use OAuth, defaults to false
+;disable_login_form = false
+
+# Set to true to disable the signout link in the side menu. useful if you use auth.proxy, defaults to false
+;disable_signout_menu = false
 
 #################################### Anonymous Auth ##########################
 [auth.anonymous]
@@ -175,12 +227,37 @@ org_name = {{ _grafana.config.auth.anonymous.org_name }}
 ;api_url = https://www.googleapis.com/oauth2/v1/userinfo
 ;allowed_domains =
 
+#################################### Generic OAuth ##########################
+[auth.generic_oauth]
+;enabled = false
+;name = OAuth
+;allow_sign_up = true
+;client_id = some_id
+;client_secret = some_secret
+;scopes = user:email,read:org
+;auth_url = https://foo.bar/login/oauth/authorize
+;token_url = https://foo.bar/login/oauth/access_token
+;api_url = https://foo.bar/user
+;team_ids =
+;allowed_organizations =
+
+#################################### Grafana.com Auth ####################
+[auth.grafana_com]
+;enabled = false
+;allow_sign_up = true
+;client_id = some_id
+;client_secret = some_secret
+;scopes = user:email
+;allowed_organizations =
+
 #################################### Auth Proxy ##########################
 [auth.proxy]
 ;enabled = false
 ;header_name = X-WEBAUTH-USER
 ;header_property = username
 ;auto_sign_up = true
+;ldap_sync_ttl = 60
+;whitelist = 192.168.1.1, 192.168.2.1
 
 #################################### Basic Auth ##########################
 [auth.basic]
@@ -190,17 +267,20 @@ org_name = {{ _grafana.config.auth.anonymous.org_name }}
 [auth.ldap]
 enabled = {{ _grafana.config.auth.ldap.enabled }}
 ;config_file = /etc/grafana/ldap.toml
+;allow_sign_up = true
 
 #################################### SMTP / Emailing ##########################
 [smtp]
 ;enabled = false
 ;host = localhost:25
 ;user =
+# If the password contains # or ; you have to wrap it with trippel quotes. Ex """#password;"""
 ;password =
 ;cert_file =
 ;key_file =
 ;skip_verify = false
 ;from_address = admin@grafana.localhost
+;from_name = Grafana
 
 [emails]
 ;welcome_email_on_sign_up = false
@@ -221,9 +301,16 @@ enabled = {{ _grafana.config.auth.ldap.enabled }}
 [log.console]
 ;level =
 
+# log line format, valid options are text, console and json
+;format = console
+
 # For "file" mode only
 [log.file]
 ;level =
+
+# log line format, valid options are text, console and json
+;format = text
+
 # This enables automated log rotate(switch of following options), default is true
 ;log_rotate = true
 
@@ -231,7 +318,7 @@ enabled = {{ _grafana.config.auth.ldap.enabled }}
 ;max_lines = 1000000
 
 # Max size shift of single file, default is 28 means 1 << 28, 256MB
-;max_lines_shift = 28
+;max_size_shift = 28
 
 # Segment log daily, default is true
 ;daily_rotate = true
@@ -239,7 +326,24 @@ enabled = {{ _grafana.config.auth.ldap.enabled }}
 # Expired days of log file(delete after max days), default is 7
 ;max_days = 7
 
-#################################### AMPQ Event Publisher ##########################
+[log.syslog]
+;level =
+
+# log line format, valid options are text, console and json
+;format = text
+
+# Syslog network type and address. This can be udp, tcp, or unix. If left blank, the default unix endpoints will be used.
+;network =
+;address =
+
+# Syslog facility. user, daemon and local0 through local7 are valid.
+;facility =
+
+# Syslog tag. By default, the process' argv[0] is used.
+;tag =
+
+
+#################################### AMQP Event Publisher ##########################
 [event_publisher]
 ;enabled = false
 ;rabbitmq_url = amqp://localhost/
@@ -250,5 +354,46 @@ enabled = {{ _grafana.config.auth.ldap.enabled }}
 ;enabled = false
 ;path = /var/lib/grafana/dashboards
 
+#################################### Alerting ############################
+[alerting]
+# Disable alerting engine & UI features
+;enabled = true
+# Makes it possible to turn off alert rule execution but alerting UI is visible
+;execute_alerts = true
 
+#################################### Internal Grafana Metrics ##########################
+# Metrics available at HTTP API Url /api/metrics
+[metrics]
+# Disable / Enable internal metrics
+;enabled           = true
 
+# Publish interval
+;interval_seconds  = 10
+
+# Send internal metrics to Graphite
+[metrics.graphite]
+# Enable by setting the address setting (ex localhost:2003)
+;address =
+;prefix = prod.grafana.%(instance_name)s.
+
+#################################### Grafana.com integration  ##########################
+# Url used to to import dashboards directly from Grafana.com
+[grafana_com]
+;url = https://grafana.com
+
+#################################### External image storage ##########################
+[external_image_storage]
+# Used for uploading images to public servers so they can be included in slack/email messages.
+# you can choose between (s3, webdav)
+;provider =
+
+[external_image_storage.s3]
+;bucket_url =
+;access_key =
+;secret_key =
+
+[external_image_storage.webdav]
+;url =
+;public_url =
+;username =
+;password =
