@@ -47,7 +47,6 @@ _grafana:
       name: grafana
       version: "4.*"
     upgrade: no
+  plugins_install: true
   plugins:
-    install: True
-    plugins:
-      - plugin_id: bosun-app
+    - plugin_id: bosun-app
