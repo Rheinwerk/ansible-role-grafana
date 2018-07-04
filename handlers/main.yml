@@ -3,4 +3,3 @@
 
 - name: Restart Grafana for trusty
   service: name=grafana-server state=restarted
-

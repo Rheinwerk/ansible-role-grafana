@@ -40,4 +40,3 @@
     - Restart Grafana for {{ ansible_distribution_release }}
 
   when: _grafana.plugins is defined and _grafana.plugins_install and RW_ENABLE_DOWNLOADS is defined
-
