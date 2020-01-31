@@ -18,7 +18,7 @@
 - name: Install Grafana
   apt: name={{ _grafana.apt.package.name }}={{ _grafana.apt.package.version }} state=present
   notify:
-    - Restart Grafana for {{ ansible_distribution_release }}
+    - Restart Grafana
 
 - name: Enable for Autostart
   service: name=grafana-server enabled={{ _grafana.enable }}
@@ -30,13 +30,13 @@
     - etc/grafana/ldap.toml
     - etc/default/grafana-server
   notify:
-    - Restart Grafana for {{ ansible_distribution_release }}
+    - Restart Grafana
 
 
 - name: Install Plugins
   command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version|default('') }}"
   with_items: "{{ _grafana.plugins }}"
   notify:
-    - Restart Grafana for {{ ansible_distribution_release }}
+    - Restart Grafana
 
   when: _grafana.plugins is defined and _grafana.plugins_install and RW_ENABLE_DOWNLOADS is defined
