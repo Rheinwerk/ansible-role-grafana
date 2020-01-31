@@ -40,9 +40,9 @@ _grafana:
   apt:
     repo:
       use_vendor_repo: yes
-      vendor_repo_key: https://packagecloud.io/gpg.key
+      vendor_repo_key: https://packages.grafana.com/gpg.key
       # Currently, there is no Ubuntu compatible URL, we have to fall back to Debian Wheezy
-      vendor_repo_url: deb https://packagecloud.io/grafana/stable/debian/ wheezy main
+      vendor_repo_url: deb https://packages.grafana.com/oss/deb stable main
     package:
       name: grafana
       version: "4.*"
