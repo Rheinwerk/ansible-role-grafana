@@ -38,8 +38,8 @@
 - name: Install Plugins
   command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version|default('') }}"
   with_items: "{{ _grafana.plugins }}"
-  register: _plugin_install
-  until: _plugin_install is succeeded
+  register: plugins_installation
+  until: plugins_installation is succeeded
   retries: 5
   delay: 2
   notify:
