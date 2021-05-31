@@ -33,9 +33,15 @@
     - Restart Grafana
 
 
+# retry installation up to 5 times as download failes sometimes.
+# https://github.com/grafana/grafana/issues/13079
 - name: Install Plugins
   command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version|default('') }}"
   with_items: "{{ _grafana.plugins }}"
+  register: plugins_installation
+  until: plugins_installation is succeeded
+  retries: 5
+  delay: 2
   notify:
     - Restart Grafana
 
