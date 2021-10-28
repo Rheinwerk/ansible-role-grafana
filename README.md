@@ -3,7 +3,7 @@ Grafana
 
 This role installes Grafana with opiniated default settings.
 
-[![Build Status](https://travis-ci.org/Rheinwerk/ansible-role-grafana.svg?branch=master)](https://travis-ci.org/Rheinwerk/ansible-role-grafana)
+[![Build Status](https://github.com/Rheinwerk/ansible-role-grafana/actions/workflows/ci.yml/badge.svg)](https://github.com/Rheinwerk/ansible-role-grafana/actions/workflows/ci.yml)
 
 Requirements
 ------------
