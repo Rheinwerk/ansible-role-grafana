@@ -3,6 +3,7 @@
 # tasks file for ansible-role-grafana
 
 - name: Add APT Repo
+  when: _grafana.apt.repo.use_vendor_repo
   block:
   - name: Add Vendor Repository Key
     apt_key:
@@ -13,7 +14,6 @@
     apt_repository:
       repo: "{{ _grafana.apt.repo.vendor_repo_url }}"
       state: present
-  when: _grafana.apt.repo.use_vendor_repo
 
 - name: Apt Update
   apt:
