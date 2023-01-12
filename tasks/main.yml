@@ -2,29 +2,43 @@
 # vim:ft=ansible:ts=2:et:
 # tasks file for ansible-role-grafana
 
-- block:
+- name: Add APT Repo
+  when: _grafana.apt.repo.use_vendor_repo
+  block:
   - name: Add Vendor Repository Key
-    apt_key: url={{ _grafana.apt.repo.vendor_repo_key }} state=present
+    apt_key:
+      url: "{{ _grafana.apt.repo.vendor_repo_key }}"
+      state: present
 
   - name: Add Vendor Repository
-    apt_repository: repo="{{ _grafana.apt.repo.vendor_repo_url }}" state=present
-
-  when: _grafana.apt.repo.use_vendor_repo
+    apt_repository:
+      repo: "{{ _grafana.apt.repo.vendor_repo_url }}"
+      state: present
 
 - name: Apt Update
-  apt: update_cache=yes
+  apt:
+    update_cache: yes
   when: RW_APT_CACHE_UPDATE is defined
 
 - name: Install Grafana
-  apt: name={{ _grafana.apt.package.name }}={{ _grafana.apt.package.version }} state=present
+  apt:
+    name: "{{ _grafana.apt.package.name }}={{ _grafana.apt.package.version }}"
+    state: present
   notify:
     - Restart Grafana
 
 - name: Enable for Autostart
-  service: name=grafana-server enabled={{ _grafana.enable }}
+  service:
+    name: grafana-server
+    enabled: "{{ _grafana.enable }}"
 
 - name: Create Configuration Files
-  template: src={{ item }}.j2 dest=/{{ item }} owner=grafana group=grafana mode=0640
+  template:
+    src: "{{ item }}.j2"
+    dest: "/{{ item }}"
+    owner: grafana
+    group: grafana
+    mode: 0640
   with_items:
     - etc/grafana/grafana.ini
     - etc/grafana/ldap.toml
@@ -32,11 +46,10 @@
   notify:
     - Restart Grafana
 
-
 # retry installation up to 5 times as download failes sometimes.
 # https://github.com/grafana/grafana/issues/13079
 - name: Install Plugins
-  command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version|default('') }}"
+  command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version | default('') }}"
   with_items: "{{ _grafana.plugins }}"
   register: plugins_installation
   until: plugins_installation is succeeded
@@ -44,5 +57,4 @@
   delay: 2
   notify:
     - Restart Grafana
-
   when: _grafana.plugins is defined and _grafana.plugins_install and RW_ENABLE_DOWNLOADS is defined
