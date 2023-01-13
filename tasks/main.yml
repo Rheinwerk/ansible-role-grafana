@@ -5,10 +5,11 @@
 - name: Add APT Repo
   when: _grafana.apt.repo.use_vendor_repo
   block:
-  - name: Add Vendor Repository Key
-    apt_key:
+  - name: Download Add Vendor Repository Key
+    get_url:
       url: "{{ _grafana.apt.repo.vendor_repo_key }}"
-      state: present
+      dest: /etc/apt/trusted.gpg.d/grafana.asc
+      mode: 0644
 
   - name: Add Vendor Repository
     apt_repository:
