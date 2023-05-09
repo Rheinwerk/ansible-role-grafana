@@ -6,35 +6,35 @@
   when: _grafana.apt.repo.use_vendor_repo
   block:
   - name: Download Add Vendor Repository Key
-    get_url:
+    ansible.builtin.get_url:
       url: "{{ _grafana.apt.repo.vendor_repo_key }}"
       dest: /etc/apt/trusted.gpg.d/grafana.asc
       mode: 0644
 
   - name: Add Vendor Repository
-    apt_repository:
+    ansible.builtin.apt_repository:
       repo: "{{ _grafana.apt.repo.vendor_repo_url }}"
       state: present
 
 - name: Apt Update
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
   when: RW_APT_CACHE_UPDATE is defined
 
 - name: Install Grafana
-  apt:
+  ansible.builtin.apt:
     name: "{{ _grafana.apt.package.name }}={{ _grafana.apt.package.version }}"
     state: present
   notify:
     - Restart Grafana
 
 - name: Enable for Autostart
-  service:
+  ansible.builtin.service:
     name: grafana-server
     enabled: "{{ _grafana.enable }}"
 
 - name: Create Configuration Files
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/{{ item }}"
     owner: grafana
@@ -50,7 +50,7 @@
 # retry installation up to 5 times as download failes sometimes.
 # https://github.com/grafana/grafana/issues/13079
 - name: Install Plugins
-  command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version | default('') }}"
+  ansible.builtin.command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version | default('') }}"
   with_items: "{{ _grafana.plugins }}"
   register: plugins_installation
   until: plugins_installation is succeeded
