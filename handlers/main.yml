@@ -1,6 +1,6 @@
 ---
 # handlers file for ansible-role-grafana
 - name: Restart Grafana
-  service:
+  ansible.builtin.service:
     name: grafana-server
     state: restarted
