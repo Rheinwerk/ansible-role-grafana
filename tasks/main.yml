@@ -9,7 +9,7 @@
     ansible.builtin.get_url:
       url: "{{ _grafana.apt.repo.vendor_repo_key }}"
       dest: /etc/apt/trusted.gpg.d/grafana.asc
-      mode: 0644
+      mode: "0644"
 
   - name: Add Vendor Repository
     ansible.builtin.apt_repository:
@@ -39,7 +39,7 @@
     dest: "/{{ item }}"
     owner: grafana
     group: grafana
-    mode: 0640
+    mode: "0640"
   with_items:
     - etc/grafana/grafana.ini
     - etc/grafana/ldap.toml
@@ -50,7 +50,11 @@
 # retry installation up to 5 times as download failes sometimes.
 # https://github.com/grafana/grafana/issues/13079
 - name: Install Plugins
-  ansible.builtin.command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version | default('') }}"
+  community.grafana.grafana_plugin:
+    name: "{{ item.plugin_id }}"
+    version: "{{ item.plugin_version | default(omit) }}"
+    state: present
+    validate_certs: false
   with_items: "{{ _grafana.plugins }}"
   register: plugins_installation
   until: plugins_installation is succeeded
