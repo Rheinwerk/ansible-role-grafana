@@ -9,7 +9,7 @@
     ansible.builtin.get_url:
       url: "{{ _grafana.apt.repo.vendor_repo_key }}"
       dest: /etc/apt/trusted.gpg.d/grafana.asc
-      mode: 0644
+      mode: "0644"
 
   - name: Add Vendor Repository
     ansible.builtin.apt_repository:
@@ -39,7 +39,7 @@
     dest: "/{{ item }}"
     owner: grafana
     group: grafana
-    mode: 0640
+    mode: "0640"
   with_items:
     - etc/grafana/grafana.ini
     - etc/grafana/ldap.toml
