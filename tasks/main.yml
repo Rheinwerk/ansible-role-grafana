@@ -9,7 +9,7 @@
     ansible.builtin.get_url:
       url: "{{ _grafana.apt.repo.vendor_repo_key }}"
       dest: /etc/apt/trusted.gpg.d/grafana.asc
-      mode: 0644
+      mode: "0644"
 
   - name: Add Vendor Repository
     ansible.builtin.apt_repository:
@@ -39,7 +39,7 @@
     dest: "/{{ item }}"
     owner: grafana
     group: grafana
-    mode: 0640
+    mode: "0640"
   with_items:
     - etc/grafana/grafana.ini
     - etc/grafana/ldap.toml
@@ -53,6 +53,7 @@
   ansible.builtin.command: "grafana-cli plugins install {{ item.plugin_id }} {{ item.plugin_version | default('') }}"
   with_items: "{{ _grafana.plugins }}"
   register: plugins_installation
+  changed_when: true
   until: plugins_installation is succeeded
   retries: 5
   delay: 2
